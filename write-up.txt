@@ -1,0 +1,38 @@
+Chosing Instances and why,
+For training ml.m5.xlarge is used cost might be high but chosen for faster training.
+For Inference ml.m4.xlarge is used. Cost might be high but chosen to process large data like images in a small time and give
+quick inferences.
+
+
+EC2 Instnce type and why you chose it?
+Amazon Linux2 AMI. and pytorch environment is activated in terminal.
+Instance used was t3.xlarge since it's a training job for faster execution.
+	
+
+
+How Lambda is written?
+Lambda is written in a way that it gets a dictionary of the image url as an event, then it invokes the endpoint 
+with runtime.invoke_endpoint() function that takes the creted in-service endpoint, the input and the input format. After its execution, 
+Result is decoded and returned as a value of a body key.
+
+Difference between sagemaker code  and EC2 code (ec2train1.py):
+In EC2 training .py code, data directory and model directory are not passed as environment variables, 
+they are local machine directories. Local directory paths are 
+dogImages/train,dogImages/test,dogImages/valid. Model outptut directory is 'TrainedModels/model.pth'.
+No training jobs are started, the code uses the local machine computational capabilities(CPU). 
+
+
+Regarding Lambda security,
+There might be some risks in general due to,
+1- Roles that have "FullAccess" policies attached may be too permissive and may lead to problems. 
+2- Roles that are old or inactive may lead to vulnerabilities because they may belong to people who are
+ no longer working on the project and who may not be careful about ensuring the project's success. 
+3- Roles that are not used by the project or services should be deleted.
+
+Setting Provision concurrency:
+First, we have to add version of our lambda function, then go to configuration->Concurrency->Add config. I chose 3 instances to be
+always available to be used for executing lambda function in case traffic increases. I found that I will be charged for 4.19 USD/month
+
+For AutoScaling. 
+I opened my endpoint autoscaling config. I Chose scale-in and scale-out cool down to be 30 sec.This is to wait about 30 sec before assigning a new instance or before  closing it.
+Maximum number of instances of 3 . Target value of 10, meaning that if requests are more than 10, another instance will be used for inference.
